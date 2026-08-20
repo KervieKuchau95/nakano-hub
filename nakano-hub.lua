@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local RS = game:GetService("RunService")
 local TS = game:GetService("TweenService")
 local VIM = game:GetService("VirtualInputManager")
+local UIS = game:GetService("UserInputService")
 
 local plr = Players.LocalPlayer
 local cam = workspace.CurrentCamera
@@ -28,67 +29,196 @@ gui.Name = "NakanoV13"
 gui.ResetOnSpawn = false
 gui.Parent = game.CoreGui
 
---// NOTIFICACIÓN
+--// FUENTE PIXEL
+local PIXEL_FONT = Enum.Font.Arcade
+
+--// =========================================================
+--// NOTIFICACIÓN ABAJO DERECHA
+--// =========================================================
+
 local notif = Instance.new("Frame")
 notif.Parent = gui
-notif.Size = UDim2.new(0, 320, 0, 48)
-notif.Position = UDim2.new(0.5, -160, 0, -60)
-notif.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-notif.BackgroundTransparency = 0.2
+notif.Size = UDim2.new(0, 310, 0, 82)
+notif.Position = UDim2.new(1, -325, 1, -105)
+notif.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
+notif.BackgroundTransparency = 0.12
+notif.Visible = true
 
 Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 12)
 
-local nStroke = Instance.new("UIStroke", notif)
-nStroke.Color = Color3.fromRGB(255, 105, 180)
-nStroke.Thickness = 2
+local notifStroke = Instance.new("UIStroke", notif)
+notifStroke.Color = Color3.fromRGB(255, 105, 180)
+notifStroke.Thickness = 2
 
-local nText = Instance.new("TextLabel", notif)
-nText.Size = UDim2.new(1, 0, 1, 0)
-nText.BackgroundTransparency = 1
-nText.Text = "NAKANO HUB by Kervie_Kuchau95⚡"
-nText.Font = Enum.Font.GothamBold
-nText.TextSize = 13
-nText.TextColor3 = Color3.fromRGB(255, 255, 255)
+--// IMAGEN DE MIKU EN NOTIFICACIÓN
+local notifImg = Instance.new("ImageLabel")
+notifImg.Parent = notif
+notifImg.Size = UDim2.new(0, 68, 0, 68)
+notifImg.Position = UDim2.new(0, 7, 0.5, -34)
+notifImg.BackgroundTransparency = 1
+notifImg.Image = "rbxassetid://118017336964341"
+notifImg.ScaleType = Enum.ScaleType.Crop
 
-TS:Create(
-    notif,
-    TweenInfo.new(0.5, Enum.EasingStyle.Back),
-    {Position = UDim2.new(0.5, -160, 0, 20)}
-):Play()
+Instance.new("UICorner", notifImg).CornerRadius = UDim.new(1, 0)
 
+--// TEXTO
+local notifTitle = Instance.new("TextLabel")
+notifTitle.Parent = notif
+notifTitle.Size = UDim2.new(1, -85, 0, 24)
+notifTitle.Position = UDim2.new(0, 82, 0, 12)
+notifTitle.BackgroundTransparency = 1
+notifTitle.Text = "NAKANO HUB ⚡"
+notifTitle.Font = PIXEL_FONT
+notifTitle.TextSize = 16
+notifTitle.TextColor3 = Color3.fromRGB(255, 170, 220)
+notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local notifBy = Instance.new("TextLabel")
+notifBy.Parent = notif
+notifBy.Size = UDim2.new(1, -85, 0, 20)
+notifBy.Position = UDim2.new(0, 82, 0, 37)
+notifBy.BackgroundTransparency = 1
+notifBy.Text = "by Kervie_Kuchau95"
+notifBy.Font = PIXEL_FONT
+notifBy.TextSize = 11
+notifBy.TextColor3 = Color3.fromRGB(255, 255, 255)
+notifBy.TextXAlignment = Enum.TextXAlignment.Left
+
+local notifStatus = Instance.new("TextLabel")
+notifStatus.Parent = notif
+notifStatus.Size = UDim2.new(1, -85, 0, 18)
+notifStatus.Position = UDim2.new(0, 82, 0, 57)
+notifStatus.BackgroundTransparency = 1
+notifStatus.Text = "CARGADO EXITOSAMENTE"
+notifStatus.Font = PIXEL_FONT
+notifStatus.TextSize = 9
+notifStatus.TextColor3 = Color3.fromRGB(255, 150, 205)
+notifStatus.TextXAlignment = Enum.TextXAlignment.Left
+
+--// FADE DESPUÉS DE 3 SEGUNDOS
 task.delay(3, function()
-    TS:Create(
-        notif,
-        TweenInfo.new(0.4),
-        {Position = UDim2.new(0.5, -160, 0, -60)}
-    ):Play()
+
+    local info = TweenInfo.new(
+        0.65,
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.Out
+    )
+
+    TS:Create(notif, info, {
+        BackgroundTransparency = 1
+    }):Play()
+
+    TS:Create(notifStroke, info, {
+        Transparency = 1
+    }):Play()
+
+    TS:Create(notifImg, info, {
+        ImageTransparency = 1
+    }):Play()
+
+    TS:Create(notifTitle, info, {
+        TextTransparency = 1
+    }):Play()
+
+    TS:Create(notifBy, info, {
+        TextTransparency = 1
+    }):Play()
+
+    TS:Create(notifStatus, info, {
+        TextTransparency = 1
+    }):Play()
+
+    task.wait(0.7)
+
+    notif.Visible = false
 end)
 
---// BOTÓN FLOTANTE CIRCULAR
-local side = Instance.new("Frame")
-side.Parent = gui
-side.Size = UDim2.new(0, 70, 0, 70)
-side.Position = UDim2.new(0, 15, 0.4, 0)
-side.BackgroundTransparency = 1
-side.Active = true
-side.Draggable = true
+--// =========================================================
+--// BOTÓN MIKU
+--// IZQUIERDA ABAJO
+--// SIN MARCO ROSA
+--// MOVIMIENTO MANUAL
+--// =========================================================
 
-local btn = Instance.new("ImageButton")
-btn.Parent = side
-btn.Size = UDim2.new(0, 65, 0, 65)
-btn.Position = UDim2.new(0.5, -32, 0.5, -32)
-btn.Image = "rbxassetid://118017336964341"
-btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-btn.BackgroundTransparency = 0
+local miku = Instance.new("ImageButton")
+miku.Parent = gui
+miku.Size = UDim2.new(0, 82, 0, 82)
+miku.Position = UDim2.new(0, 22, 1, -105)
+miku.BackgroundTransparency = 1
+miku.Image = "rbxassetid://118017336964341"
+miku.ScaleType = Enum.ScaleType.Crop
+miku.AutoButtonColor = false
 
---// CÍRCULO REAL, SIN MARCO CUADRADO
-Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+--// SOLO RECORTE CIRCULAR
+--// NO UIStroke = NO ARO ROSA
+local mikuCorner = Instance.new("UICorner")
+mikuCorner.Parent = miku
+mikuCorner.CornerRadius = UDim.new(1, 0)
 
-local s1 = Instance.new("UIStroke", btn)
-s1.Color = Color3.fromRGB(255, 105, 180)
-s1.Thickness = 2.5
+--// =========================================================
+--// DRAG MANUAL DEL BOTÓN
+--// EVITA EL BUG DE DRAGGABLE
+--// =========================================================
 
+local dragging = false
+local dragStart
+local startPos
+local moved = false
+
+local function updateDrag(input)
+
+    local delta = input.Position - dragStart
+
+    miku.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+miku.InputBegan:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+
+        dragging = true
+        moved = false
+
+        dragStart = input.Position
+        startPos = miku.Position
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+
+        end)
+    end
+end)
+
+miku.InputChanged:Connect(function(input)
+
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch then
+
+        if dragging then
+            updateDrag(input)
+
+            local delta = input.Position - dragStart
+
+            if math.abs(delta.X) > 8 or math.abs(delta.Y) > 8 then
+                moved = true
+            end
+        end
+    end
+end)
+
+--// =========================================================
 --// MAIN
+--// =========================================================
+
 local main = Instance.new("Frame")
 main.Parent = gui
 main.Size = UDim2.new(0, 395, 0, 470)
@@ -97,15 +227,18 @@ main.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
 main.BackgroundTransparency = 0.25
 main.Visible = false
 main.Active = true
-main.Draggable = true
 
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 16)
 
-local s2 = Instance.new("UIStroke", main)
-s2.Color = Color3.fromRGB(255, 105, 180)
-s2.Thickness = 2
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Parent = main
+mainStroke.Color = Color3.fromRGB(255, 105, 180)
+mainStroke.Thickness = 2
 
+--// =========================================================
 --// SAKURA
+--// =========================================================
+
 local sakuraContainer = Instance.new("Frame")
 sakuraContainer.Parent = main
 sakuraContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -114,6 +247,7 @@ sakuraContainer.ClipsDescendants = true
 sakuraContainer.ZIndex = 10
 
 for i = 1, 8 do
+
     local petal = Instance.new("TextLabel")
     petal.Parent = sakuraContainer
     petal.Text = "🌸"
@@ -124,12 +258,18 @@ for i = 1, 8 do
     petal.ZIndex = 10
 
     task.spawn(function()
+
         while task.wait(math.random(4, 8)) do
-            petal.Position = UDim2.new(math.random(), 0, -0.1, 0)
+
+            petal.Position =
+                UDim2.new(math.random(), 0, -0.1, 0)
 
             TS:Create(
                 petal,
-                TweenInfo.new(math.random(5, 9), Enum.EasingStyle.Linear),
+                TweenInfo.new(
+                    math.random(5, 9),
+                    Enum.EasingStyle.Linear
+                ),
                 {
                     Position = UDim2.new(
                         petal.Position.X.Scale,
@@ -139,11 +279,16 @@ for i = 1, 8 do
                     )
                 }
             ):Play()
+
         end
+
     end)
 end
 
+--// =========================================================
 --// TOP
+--// =========================================================
+
 local top = Instance.new("Frame")
 top.Parent = main
 top.Size = UDim2.new(1, 0, 0, 42)
@@ -158,7 +303,7 @@ tl.Size = UDim2.new(1, -60, 1, 0)
 tl.Position = UDim2.new(0, 15, 0, 0)
 tl.Text = "NAKANO HUB • VISUAL 🍌🐱🌸"
 tl.BackgroundTransparency = 1
-tl.Font = Enum.Font.GothamBold
+tl.Font = PIXEL_FONT
 tl.TextSize = 14
 tl.TextColor3 = Color3.fromRGB(255, 255, 255)
 tl.TextXAlignment = Enum.TextXAlignment.Left
@@ -171,6 +316,8 @@ close.Position = UDim2.new(1, -35, 0, 7)
 close.Text = "X"
 close.TextColor3 = Color3.new(1, 1, 1)
 close.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+close.Font = PIXEL_FONT
+close.TextSize = 14
 
 Instance.new("UICorner", close).CornerRadius = UDim.new(0, 8)
 
@@ -178,7 +325,10 @@ close.MouseButton1Click:Connect(function()
     main.Visible = false
 end)
 
+--// =========================================================
 --// SCROLL
+--// =========================================================
+
 local scroll = Instance.new("ScrollingFrame")
 scroll.Parent = main
 scroll.Size = UDim2.new(1, 0, 1, -92)
@@ -197,7 +347,10 @@ pad.PaddingLeft = UDim.new(0, 12)
 pad.PaddingRight = UDim.new(0, 12)
 pad.PaddingTop = UDim.new(0, 10)
 
+--// =========================================================
 --// TOGGLE
+--// =========================================================
+
 local function MakeToggle(name, desc, default, callback)
 
     local f = Instance.new("Frame")
@@ -218,8 +371,8 @@ local function MakeToggle(name, desc, default, callback)
     t1.Position = UDim2.new(0, 10, 0, 8)
     t1.BackgroundTransparency = 1
     t1.TextColor3 = Color3.new(1, 1, 1)
-    t1.Font = Enum.Font.GothamBold
-    t1.TextSize = 13
+    t1.Font = PIXEL_FONT
+    t1.TextSize = 12
     t1.TextXAlignment = Enum.TextXAlignment.Left
 
     local t2 = Instance.new("TextLabel")
@@ -229,13 +382,15 @@ local function MakeToggle(name, desc, default, callback)
     t2.Position = UDim2.new(0, 10, 0, 30)
     t2.BackgroundTransparency = 1
     t2.TextColor3 = Color3.fromRGB(130, 180, 255)
-    t2.TextSize = 10
+    t2.Font = PIXEL_FONT
+    t2.TextSize = 9
     t2.TextXAlignment = Enum.TextXAlignment.Left
 
     local tog = Instance.new("Frame")
     tog.Parent = f
     tog.Size = UDim2.new(0, 52, 0, 26)
     tog.Position = UDim2.new(1, -62, 0.5, -13)
+
     tog.BackgroundColor3 =
         default
         and Color3.fromRGB(255, 105, 180)
@@ -246,6 +401,7 @@ local function MakeToggle(name, desc, default, callback)
     local dot = Instance.new("Frame")
     dot.Parent = tog
     dot.Size = UDim2.new(0, 20, 0, 20)
+
     dot.Position =
         default
         and UDim2.new(1, -23, 0.5, -10)
@@ -293,7 +449,9 @@ local function MakeToggle(name, desc, default, callback)
     end)
 end
 
---// LÓGICA DEL CÓDIGO 1
+--// =========================================================
+--// LOGICA ORIGINAL
+--// =========================================================
 
 local function GetClosestPlayer()
 
@@ -338,8 +496,7 @@ local function GetClosestPlayer()
     return closest
 end
 
---// TOGGLES
-
+--// FPS BOOST
 MakeToggle(
     "FPS BOOST ULTRA",
     "Activa - Quita lag Draco V4",
@@ -362,13 +519,15 @@ MakeToggle(
                 elseif obj:IsA("ParticleEmitter") then
                     obj.Enabled = false
                 end
+
             end
         end
     end
 )
 
+--// AUTO TP
 MakeToggle(
-    "Auto TP Jugador",
+    "AUTO TP JUGADOR",
     "SOLO players - Fix NPC",
     false,
     function(v)
@@ -376,8 +535,9 @@ MakeToggle(
     end
 )
 
+--// AIMBOT
 MakeToggle(
-    "Aimbot PVP",
+    "AIMBOT PVP",
     "Lock al mas cercano a mira",
     false,
     function(v)
@@ -385,8 +545,9 @@ MakeToggle(
     end
 )
 
+--// AUTO V4
 MakeToggle(
-    "Auto V4 Draco",
+    "AUTO V4 DRACO",
     "Presiona Y automatico",
     false,
     function(v)
@@ -394,8 +555,9 @@ MakeToggle(
     end
 )
 
+--// ESP
 MakeToggle(
-    "ESP Vida + Dist",
+    "ESP VIDA + DIST",
     "Ver vida real",
     false,
     function(v)
@@ -403,7 +565,10 @@ MakeToggle(
     end
 )
 
+--// =========================================================
 --// PREMIUM
+--// =========================================================
+
 local prem = Instance.new("Frame")
 prem.Parent = main
 prem.Size = UDim2.new(1, -20, 0, 34)
@@ -418,29 +583,51 @@ pt.Size = UDim2.new(1, 0, 1, 0)
 pt.Text = "PREMIUM • MIKU NAKANO • V13"
 pt.BackgroundTransparency = 1
 pt.TextColor3 = Color3.new(1, 1, 1)
-pt.Font = Enum.Font.GothamBold
+pt.Font = PIXEL_FONT
 pt.TextSize = 11
 
---// BOTÓN MIKU
-btn.MouseButton1Click:Connect(function()
+--// =========================================================
+--// ABRIR / CERRAR CON MIKU
+--// =========================================================
 
-    main.Visible = not main.Visible
+local clickStart
 
-    if main.Visible then
-
-        main.Size = UDim2.new(0, 0, 0, 0)
-
-        TS:Create(
-            main,
-            TweenInfo.new(0.3, Enum.EasingStyle.Back),
-            {
-                Size = UDim2.new(0, 395, 0, 470)
-            }
-        ):Play()
-    end
+miku.MouseButton1Down:Connect(function()
+    clickStart = tick()
 end)
 
+miku.MouseButton1Up:Connect(function()
+
+    if not moved then
+
+        main.Visible = not main.Visible
+
+        if main.Visible then
+
+            main.Size = UDim2.new(0, 0, 0, 0)
+
+            TS:Create(
+                main,
+                TweenInfo.new(
+                    0.3,
+                    Enum.EasingStyle.Back,
+                    Enum.EasingDirection.Out
+                ),
+                {
+                    Size = UDim2.new(0, 395, 0, 470)
+                }
+            ):Play()
+
+        end
+    end
+
+    moved = false
+end)
+
+--// =========================================================
 --// AIMBOT
+--// =========================================================
+
 RS.RenderStepped:Connect(function()
 
     if getgenv().Nakano.Aim then
@@ -460,7 +647,10 @@ RS.RenderStepped:Connect(function()
     end
 end)
 
+--// =========================================================
 --// AUTO TP
+--// =========================================================
+
 task.spawn(function()
 
     while task.wait(0.35) do
@@ -484,7 +674,10 @@ task.spawn(function()
     end
 end)
 
+--// =========================================================
 --// AUTO V4
+--// =========================================================
+
 task.spawn(function()
 
     while task.wait(2) do
@@ -508,9 +701,10 @@ task.spawn(function()
                     false,
                     game
                 )
+
             end)
         end
     end
 end)
 
-print("NAKANO V13 MIKU + BANANA CAT + SAKURA CARGADO")
+print("NAKANO V13 • MIKU + BANANA CAT + SAKURA • CARGADO")
