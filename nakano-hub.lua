@@ -1,129 +1,94 @@
---// NAKANO HUB - FINAL CLEAN BY KERVIE
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
-local Camera = Workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
-
-pcall(function() game.StarterGui:SetCore("SendNotification",{Title="Nakano Hub",Text="Cargado!",Duration=3}) end)
-
-local ESP_ENABLED = false
-local AIMBOT_ENABLED = false
-local NOCLIP_ENABLED = false
-
-local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-gui.Name = "NakanoHub"
+--// NAKANO HUB V4 - MIKU CIRCULAR FINAL BY KERVIE
+local plr = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "NakanoHubV4"
 gui.ResetOnSpawn = false
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,260,0,280)
-frame.Position = UDim2.new(0,50,0,80)
-frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-frame.Active = true
-frame.Draggable = true
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,35)
-title.Text = "Nakano Hub"
-title.BackgroundColor3 = Color3.fromRGB(255,105,180)
-title.TextScaled = true
-title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.new(1,1,1)
-
-local openBtn = Instance.new("TextButton", gui)
-openBtn.Size = UDim2.new(0,50,0,50)
-openBtn.Position = UDim2.new(0,10,0.5,0)
-openBtn.Text = "N"
-openBtn.BackgroundColor3 = Color3.fromRGB(255,105,180)
-openBtn.TextScaled = true
-openBtn.TextColor3 = Color3.new(1,1,1)
-openBtn.Draggable = true
+local openBtn = Instance.new("ImageButton", gui)
+openBtn.Size = UDim2.new(0,65,0,65)
+openBtn.Position = UDim2.new(0.05,0,0.15,0)
+openBtn.Image = "rbxassetid://121791820577874"
+openBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
 openBtn.Active = true
-openBtn.MouseButton1Click:Connect(function() frame.Visible = not frame.Visible end)
+openBtn.Draggable = true
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1,0)
+local stroke = Instance.new("UIStroke", openBtn)
+stroke.Color = Color3.fromRGB(255,105,180)
+stroke.Thickness = 3
 
-UserInputService.InputBegan:Connect(function(input,gpe) if not gpe and input.KeyCode == Enum.KeyCode.RightShift then frame.Visible = not frame.Visible end end)
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0,200,0,220)
+main.Position = UDim2.new(0.05,0,0.3,0)
+main.BackgroundColor3 = Color3.fromRGB(30,30,30)
+main.Visible = false
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner", main)
 
-local function createButton(text, y, callback)
-local btn = Instance.new("TextButton", frame)
-btn.Size = UDim2.new(0,200,0,35)
-btn.Position = UDim2.new(0,30,0,y)
-btn.Text = text
-btn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-btn.TextColor3 = Color3.new(0,0,0)
-btn.Font = Enum.Font.GothamBold
-btn.MouseButton1Click:Connect(callback)
-return btn
-end
+openBtn.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
 
-createButton("ESP VIDA/DIST",50,function() ESP_ENABLED = not ESP_ENABLED end)
-createButton("AIMBOT PRO",90,function() AIMBOT_ENABLED = not AIMBOT_ENABLED end)
-createButton("NOCLIP",130,function() NOCLIP_ENABLED = not NOCLIP_ENABLED end)
-createButton("BOOST FPS",170,function() for _,v in pairs(Workspace:GetDescendants()) do if v:IsA("Texture") or v:IsA("Decal") then v.Transparency = 1 end if v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Enabled = false end end Workspace.GlobalShadows = false end)
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1,0,0,30)
+title.Text = "Nakano Hub - Miku"
+title.TextColor3 = Color3.fromRGB(255,105,180)
+title.BackgroundColor3 = Color3.fromRGB(45,45,45)
+title.TextScaled = true
+Instance.new("UICorner", title)
 
-RunService.Stepped:Connect(function() if NOCLIP_ENABLED and LocalPlayer.Character then for _,part in pairs(LocalPlayer.Character:GetDescendants()) do if part:IsA("BasePart") and part.CanCollide then part.CanCollide = false end end end end)
-
-local FOV = Drawing.new("Circle")
-FOV.Visible = true
-FOV.Radius = 120
-FOV.Color = Color3.fromRGB(255,105,180)
-FOV.Thickness = 2
-
-local espCache = {}
-function createESP(player)
-if player == LocalPlayer then return end
-local box = Drawing.new("Square")
-box.Color = Color3.fromRGB(255,105,180)
-box.Thickness = 2
-box.Filled = false
-local text = Drawing.new("Text")
-text.Color = Color3.fromRGB(255,255,255)
-text.Size = 16
-text.Center = true
-text.Outline = true
-espCache[player] = {box,text}
-end
-for _,p in pairs(Players:GetPlayers()) do createESP(p) end
-Players.PlayerAdded:Connect(createESP)
-Players.PlayerRemoving:Connect(function(p) if espCache[p] then espCache[p][1]:Remove() espCache[p][2]:Remove() espCache[p]=nil end end)
-
-function getClosest()
-local closest, shortest = nil, 120
-local mousePos = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-for _,player in pairs(Players:GetPlayers()) do
-if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-if onScreen then
-local dist = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
-if dist < shortest then shortest = dist closest = player end
-end
-end
-end
-return closest
+local function createBtn(text, y, callback)
+    local b = Instance.new("TextButton", main)
+    b.Size = UDim2.new(0.9,0,0,35)
+    b.Position = UDim2.new(0.05,0,0,y)
+    b.Text = text.." [OFF]"
+    b.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    b.TextColor3 = Color3.new(1,1,1)
+    b.TextScaled = true
+    Instance.new("UICorner", b)
+    local on = false
+    b.MouseButton1Click:Connect(function()
+        on = not on
+        b.Text = text.." ["..(on and "ON" or "OFF").."]"
+        b.BackgroundColor3 = on and Color3.fromRGB(255,105,180) or Color3.fromRGB(60,60,60)
+        callback(on)
+    end)
 end
 
-RunService.RenderStepped:Connect(function()
-FOV.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-if AIMBOT_ENABLED then
-local target = getClosest()
-if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Character.HumanoidRootPart.Position)
-end
-end
-for player,data in pairs(espCache) do
-local box,text = data[1],data[2]
-if ESP_ENABLED and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
-local root,hum = player.Character.HumanoidRootPart, player.Character.Humanoid
-local pos,visible = Camera:WorldToViewportPoint(root.Position)
-if visible then
-local dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - root.Position).Magnitude)
-box.Size = Vector2.new(40,60)
-box.Position = Vector2.new(pos.X-20,pos.Y-30)
-box.Visible = true
-text.Position = Vector2.new(pos.X,pos.Y-40)
-text.Text = player.Name.."\nVida: "..math.floor(hum.Health).."\nDist: "..dist
-text.Visible = true
-else box.Visible=false text.Visible=false end
-else box.Visible=false text.Visible=false end
-end
+createBtn("ESP PLAYERS", 35, function(state)
+    for _,v in pairs(game.Players:GetPlayers()) do
+        if v ~= plr and v.Character then
+            if state then
+                if not v.Character:FindFirstChild("NakanoESP") then
+                    local h = Instance.new("Highlight", v.Character)
+                    h.Name = "NakanoESP"
+                    h.FillColor = Color3.fromRGB(255,0,100)
+                    h.OutlineColor = Color3.fromRGB(255,255,255)
+                    h.FillTransparency = 0.4
+                end
+            else
+                if v.Character:FindFirstChild("NakanoESP") then v.Character.NakanoESP:Destroy() end
+            end
+        end
+    end
+end)
+
+createBtn("AIMBOT", 75, function(s) getgenv().Aimbot = s end)
+
+createBtn("NOCLIP", 115, function(s)
+    getgenv().Noclip = s
+    game:GetService("RunService").Stepped:Connect(function()
+        if getgenv().Noclip and plr.Character then
+            for _,v in pairs(plr.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+        end
+    end)
+end)
+
+createBtn("BOOST FPS", 155, function(state)
+    if state then
+        for _,v in pairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+            if v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1 end
+            if v:IsA("ParticleEmitter") then v.Enabled = false end
+        end
+        game.Lighting.GlobalShadows = false
+    end
 end)
