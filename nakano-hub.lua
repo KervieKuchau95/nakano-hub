@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local RS = game:GetService("RunService")
 local TS = game:GetService("TweenService")
 local VIM = game:GetService("VirtualInputManager")
+local HttpService = game:GetService("HttpService")
 
 local plr = Players.LocalPlayer
 local cam = workspace.CurrentCamera
@@ -15,8 +16,84 @@ getgenv().Nakano = getgenv().Nakano or {
     Aim = false,
     ESP = false,
     Boost = false,
+    AutoSave = false,
     FOV = 300
 }
+
+--========================================================--
+-- CONFIG
+--========================================================--
+
+local CONFIG_FILE = "NakanoHub_V13_Config.json"
+local MAX_LEVEL = 2800
+local ESP_MAX_DISTANCE = 2000
+
+--========================================================--
+-- LOAD CONFIG
+--========================================================--
+
+local function LoadConfig()
+
+    if not isfile or not isfile(CONFIG_FILE) then
+        return
+    end
+
+    local success, data = pcall(function()
+
+        return HttpService:JSONDecode(
+            readfile(CONFIG_FILE)
+        )
+
+    end)
+
+    if success and type(data) == "table" then
+
+        for key,value in pairs(data) do
+
+            if getgenv().Nakano[key] ~= nil then
+                getgenv().Nakano[key] = value
+            end
+
+        end
+
+    end
+
+end
+
+LoadConfig()
+
+--========================================================--
+-- SAVE CONFIG
+--========================================================--
+
+local function SaveConfig()
+
+    if not writefile then
+        return
+    end
+
+    pcall(function()
+
+        writefile(
+            CONFIG_FILE,
+            HttpService:JSONEncode({
+                AutoTP = getgenv().Nakano.AutoTP,
+                AutoV4 = getgenv().Nakano.AutoV4,
+                Aim = getgenv().Nakano.Aim,
+                ESP = getgenv().Nakano.ESP,
+                Boost = getgenv().Nakano.Boost,
+                AutoSave = getgenv().Nakano.AutoSave,
+                FOV = getgenv().Nakano.FOV
+            })
+        )
+
+    end)
+
+end
+
+--========================================================--
+-- REMOVE OLD GUI
+--========================================================--
 
 if game.CoreGui:FindFirstChild("NakanoV13") then
     game.CoreGui.NakanoV13:Destroy()
@@ -34,27 +111,27 @@ local PIXEL = Enum.Font.Arcade
 --========================================================--
 
 local notif = Instance.new("Frame", gui)
-notif.Size = UDim2.new(0, 310, 0, 82)
-notif.Position = UDim2.new(1, -325, 1, -105)
+notif.Size = UDim2.new(0,310,0,82)
+notif.Position = UDim2.new(1,-325,1,-105)
 notif.BackgroundColor3 = Color3.fromRGB(18,18,26)
 notif.BackgroundTransparency = 0.12
 
-Instance.new("UICorner", notif).CornerRadius = UDim.new(0,12)
+Instance.new("UICorner",notif).CornerRadius = UDim.new(0,12)
 
-local notifStroke = Instance.new("UIStroke", notif)
+local notifStroke = Instance.new("UIStroke",notif)
 notifStroke.Color = Color3.fromRGB(255,105,180)
 notifStroke.Thickness = 2
 
-local notifImg = Instance.new("ImageLabel", notif)
+local notifImg = Instance.new("ImageLabel",notif)
 notifImg.Size = UDim2.new(0,68,0,68)
 notifImg.Position = UDim2.new(0,7,0.5,-34)
 notifImg.BackgroundTransparency = 1
 notifImg.Image = "rbxassetid://118017336964341"
 notifImg.ScaleType = Enum.ScaleType.Crop
 
-Instance.new("UICorner", notifImg).CornerRadius = UDim.new(1,0)
+Instance.new("UICorner",notifImg).CornerRadius = UDim.new(1,0)
 
-local notifTitle = Instance.new("TextLabel", notif)
+local notifTitle = Instance.new("TextLabel",notif)
 notifTitle.Size = UDim2.new(1,-85,0,24)
 notifTitle.Position = UDim2.new(0,82,0,15)
 notifTitle.BackgroundTransparency = 1
@@ -64,7 +141,7 @@ notifTitle.TextSize = 16
 notifTitle.TextColor3 = Color3.fromRGB(255,170,220)
 notifTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-local notifBy = Instance.new("TextLabel", notif)
+local notifBy = Instance.new("TextLabel",notif)
 notifBy.Size = UDim2.new(1,-85,0,20)
 notifBy.Position = UDim2.new(0,82,0,42)
 notifBy.BackgroundTransparency = 1
@@ -74,9 +151,17 @@ notifBy.TextSize = 11
 notifBy.TextColor3 = Color3.new(1,1,1)
 notifBy.TextXAlignment = Enum.TextXAlignment.Left
 
-task.delay(5,function()
+-- 10 SEGUNDOS
+task.delay(10,function()
 
-    local info = TweenInfo.new(0.65,Enum.EasingStyle.Quad)
+    if not notif or not notif.Parent then
+        return
+    end
+
+    local info = TweenInfo.new(
+        0.65,
+        Enum.EasingStyle.Quad
+    )
 
     TS:Create(notif,info,{
         BackgroundTransparency = 1
@@ -99,7 +184,11 @@ task.delay(5,function()
     }):Play()
 
     task.wait(0.7)
-    notif:Destroy()
+
+    if notif then
+        notif:Destroy()
+    end
+
 end)
 
 --========================================================--
@@ -138,7 +227,9 @@ miku.InputBegan:Connect(function(input)
             end
 
         end)
+
     end
+
 end)
 
 miku.InputChanged:Connect(function(input)
@@ -150,7 +241,8 @@ miku.InputChanged:Connect(function(input)
 
         local delta = input.Position - dragStart
 
-        if math.abs(delta.X) > 8 or math.abs(delta.Y) > 8 then
+        if math.abs(delta.X) > 8
+        or math.abs(delta.Y) > 8 then
             moved = true
         end
 
@@ -160,7 +252,9 @@ miku.InputChanged:Connect(function(input)
             startPos.Y.Scale,
             startPos.Y.Offset + delta.Y
         )
+
     end
+
 end)
 
 --========================================================--
@@ -224,8 +318,11 @@ for i = 1,8 do
                     )
                 }
             ):Play()
+
         end
+
     end)
+
 end
 
 --========================================================--
@@ -273,7 +370,7 @@ scroll.Size = UDim2.new(1,0,1,-92)
 scroll.Position = UDim2.new(0,0,0,48)
 scroll.BackgroundTransparency = 1
 scroll.ScrollBarThickness = 2
-scroll.CanvasSize = UDim2.new(0,0,0,900)
+scroll.CanvasSize = UDim2.new(0,0,0,1000)
 
 local layout = Instance.new("UIListLayout",scroll)
 layout.Padding = UDim.new(0,8)
@@ -362,28 +459,95 @@ local function MakeToggle(name,desc,default,callback)
         }):Play()
 
         callback(state)
+
     end)
 
     return frame
+
 end
 
 --========================================================--
 -- ESP SYSTEM
 --========================================================--
 
-local ESPEnabled = false
+local ESPEnabled = getgenv().Nakano.ESP
 local ESPName = true
 local ESPHealth = false
 local ESPDistance = false
+local ESPLevel = true
 
 local ESPObjects = {}
+
+local function GetPlayerLevel(player)
+
+    -- Leaderstats
+    local leaderstats = player:FindFirstChild("leaderstats")
+
+    if leaderstats then
+
+        local level =
+            leaderstats:FindFirstChild("Level")
+            or leaderstats:FindFirstChild("Lvl")
+            or leaderstats:FindFirstChild("level")
+
+        if level then
+            local value = tonumber(level.Value)
+
+            if value then
+                return math.clamp(value,0,MAX_LEVEL)
+            end
+        end
+
+    end
+
+    -- Data
+    local data = player:FindFirstChild("Data")
+
+    if data then
+
+        local level =
+            data:FindFirstChild("Level")
+            or data:FindFirstChild("Lvl")
+            or data:FindFirstChild("level")
+
+        if level then
+            local value = tonumber(level.Value)
+
+            if value then
+                return math.clamp(value,0,MAX_LEVEL)
+            end
+        end
+
+    end
+
+    -- Direct Level
+    local direct =
+        player:FindFirstChild("Level")
+        or player:FindFirstChild("Lvl")
+
+    if direct then
+
+        local value = tonumber(direct.Value)
+
+        if value then
+            return math.clamp(value,0,MAX_LEVEL)
+        end
+
+    end
+
+    return nil
+
+end
 
 local function RemoveESP(player)
 
     if ESPObjects[player] then
+
         ESPObjects[player]:Destroy()
         ESPObjects[player] = nil
+
     end
+
 end
 
 local function CreateESP(player)
@@ -393,21 +557,32 @@ local function CreateESP(player)
     end
 
     local character = player.Character
-    if not character then return end
+
+    if not character then
+        return
+    end
 
     local head = character:FindFirstChild("Head")
-    if not head then return end
+
+    if not head then
+        return
+    end
 
     RemoveESP(player)
 
     local billboard = Instance.new("BillboardGui")
+
     billboard.Name = "NakanoESP"
     billboard.Parent = head
-    billboard.Size = UDim2.new(0,190,0,75)
+    billboard.Size = UDim2.new(0,210,0,95)
     billboard.StudsOffset = Vector3.new(0,3,0)
     billboard.AlwaysOnTop = true
 
+    -- MÁS ALCANCE
+    billboard.MaxDistance = ESP_MAX_DISTANCE
+
     local text = Instance.new("TextLabel",billboard)
+
     text.Size = UDim2.new(1,0,1,0)
     text.BackgroundTransparency = 1
     text.Font = PIXEL
@@ -432,10 +607,42 @@ local function CreateESP(player)
 
             local lines = {}
 
+            -- NAME
             if ESPName then
-                table.insert(lines,player.Name)
+                table.insert(
+                    lines,
+                    player.Name
+                )
             end
 
+            -- LEVEL
+            if ESPLevel then
+
+                local level = GetPlayerLevel(player)
+
+                if level then
+
+                    table.insert(
+                        lines,
+                        "LVL: "
+                        .. tostring(level)
+                        .. "/"
+                        .. tostring(MAX_LEVEL)
+                    )
+
+                else
+
+                    table.insert(
+                        lines,
+                        "LVL: ?/"
+                        .. tostring(MAX_LEVEL)
+                    )
+
+                end
+
+            end
+
+            -- HEALTH
             if ESPHealth and humanoid then
 
                 table.insert(
@@ -445,8 +652,10 @@ local function CreateESP(player)
                     .. "/"
                     .. math.floor(humanoid.MaxHealth)
                 )
+
             end
 
+            -- DISTANCE
             if ESPDistance
             and root
             and plr.Character
@@ -464,17 +673,24 @@ local function CreateESP(player)
                     .. math.floor(distance)
                     .. "m"
                 )
+
             end
 
-            text.Text = table.concat(lines,"\n")
+            text.Text = table.concat(
+                lines,
+                "\n"
+            )
 
             task.wait(0.1)
+
         end
 
         if billboard then
             billboard:Destroy()
         end
+
     end)
+
 end
 
 local function RefreshESP()
@@ -488,8 +704,11 @@ local function RefreshESP()
             else
                 RemoveESP(player)
             end
+
         end
+
     end
+
 end
 
 --========================================================--
@@ -524,6 +743,7 @@ local function MakeESPOption(name,default,callback)
     local sw = Instance.new("Frame",row)
     sw.Size = UDim2.new(0,42,0,20)
     sw.Position = UDim2.new(1,-48,0.5,-10)
+
     sw.BackgroundColor3 =
         default
         and Color3.fromRGB(255,130,190)
@@ -533,6 +753,7 @@ local function MakeESPOption(name,default,callback)
 
     local dot = Instance.new("Frame",sw)
     dot.Size = UDim2.new(0,16,0,16)
+
     dot.Position =
         default
         and UDim2.new(1,-19,0.5,-8)
@@ -568,13 +789,15 @@ local function MakeESPOption(name,default,callback)
         }):Play()
 
         callback(state)
+
     end)
+
 end
 
 MakeToggle(
     "ESP",
     "Player information overlay",
-    false,
+    getgenv().Nakano.ESP,
     function(v)
 
         ESPEnabled = v
@@ -583,7 +806,9 @@ MakeToggle(
         espOptions.Visible = v
 
         if v then
+
             task.wait()
+
             espOptions.Size =
                 UDim2.new(
                     1,
@@ -591,11 +816,16 @@ MakeToggle(
                     0,
                     espLayout.AbsoluteContentSize.Y + 4
                 )
+
         else
-            espOptions.Size = UDim2.new(1,0,0,0)
+
+            espOptions.Size =
+                UDim2.new(1,0,0,0)
+
         end
 
         RefreshESP()
+
     end
 )
 
@@ -606,6 +836,18 @@ MakeESPOption(
 
         ESPName = v
         RefreshESP()
+
+    end
+)
+
+MakeESPOption(
+    "SHOW LEVEL",
+    true,
+    function(v)
+
+        ESPLevel = v
+        RefreshESP()
+
     end
 )
 
@@ -616,6 +858,7 @@ MakeESPOption(
 
         ESPHealth = v
         RefreshESP()
+
     end
 )
 
@@ -626,17 +869,18 @@ MakeESPOption(
 
         ESPDistance = v
         RefreshESP()
+
     end
 )
 
 --========================================================--
--- OTHER FEATURES
+-- FPS BOOST
 --========================================================--
 
 MakeToggle(
     "FPS BOOST ULTRA",
     "Reduce lag and improve performance",
-    false,
+    getgenv().Nakano.Boost,
     function(v)
 
         getgenv().Nakano.Boost = v
@@ -649,41 +893,90 @@ MakeToggle(
             for _,obj in pairs(workspace:GetDescendants()) do
 
                 if obj:IsA("BasePart") then
+
                     obj.Material = Enum.Material.SmoothPlastic
                     obj.CastShadow = false
 
                 elseif obj:IsA("ParticleEmitter") then
+
                     obj.Enabled = false
+
                 end
+
             end
+
         end
+
     end
 )
+
+--========================================================--
+-- AUTO TP
+--========================================================--
 
 MakeToggle(
     "AUTO TP PLAYER",
     "Players only - NPC protection",
-    false,
+    getgenv().Nakano.AutoTP,
     function(v)
+
         getgenv().Nakano.AutoTP = v
+
     end
 )
+
+--========================================================--
+-- AIMBOT
+--========================================================--
 
 MakeToggle(
     "AIMBOT PVP",
     "Lock onto the closest player",
-    false,
+    getgenv().Nakano.Aim,
     function(v)
+
         getgenv().Nakano.Aim = v
+
     end
 )
+
+--========================================================--
+-- AUTO V4
+--========================================================--
+
+local V4Ready = true
 
 MakeToggle(
     "AUTO ACTIVE V4",
     "Automatically press Y",
-    false,
+    getgenv().Nakano.AutoV4,
     function(v)
+
         getgenv().Nakano.AutoV4 = v
+
+        if not v then
+            V4Ready = true
+        end
+
+    end
+)
+
+--========================================================--
+-- AUTO SAVE
+--========================================================--
+
+MakeToggle(
+    "AUTO SAVE",
+    "Automatically save hub settings",
+    getgenv().Nakano.AutoSave,
+    function(v)
+
+        getgenv().Nakano.AutoSave = v
+
+        if v then
+            SaveConfig()
+        end
+
     end
 )
 
@@ -708,14 +1001,32 @@ premiumText.TextSize = 11
 premiumText.TextColor3 = Color3.new(1,1,1)
 
 --========================================================--
+-- AUTO SAVE LOOP
+--========================================================--
+
+task.spawn(function()
+
+    while task.wait(5) do
+
+        if getgenv().Nakano.AutoSave then
+            SaveConfig()
+        end
+
+    end
+
+end)
+
+--========================================================--
 -- MIKU OPEN/CLOSE
 --========================================================--
 
 miku.MouseButton1Click:Connect(function()
 
     if moved then
+
         moved = false
         return
+
     end
 
     main.Visible = not main.Visible
@@ -735,20 +1046,41 @@ miku.MouseButton1Click:Connect(function()
                 Size = UDim2.new(0,395,0,470)
             }
         ):Play()
+
     end
+
 end)
 
 --========================================================--
--- CLOSE MENU WHEN PLAYER DIES / RESPAWNS
+-- CHARACTER RESPAWN
 --========================================================--
 
-plr.CharacterAdded:Connect(function()
+plr.CharacterAdded:Connect(function(character)
 
-    task.wait(0.5)
+    -- IMPORTANTE:
+    -- Esperamos a que el personaje realmente exista
 
+    task.wait(1)
+
+    -- Reset del sistema V4 después de morir
+    V4Ready = true
+
+    -- Si el Auto V4 estaba activo,
+    -- dejamos que vuelva a funcionar normalmente
+    if getgenv().Nakano.AutoV4 then
+        V4Ready = true
+    end
+
+    -- ESP del jugador local ya volvió
     if ESPEnabled then
         RefreshESP()
     end
+
+    -- Guardar configuración después del respawn
+    if getgenv().Nakano.AutoSave then
+        SaveConfig()
+    end
+
 end)
 
 --========================================================--
@@ -764,15 +1096,38 @@ Players.PlayerAdded:Connect(function(player)
         if ESPEnabled then
             CreateESP(player)
         end
+
     end)
+
 end)
 
 Players.PlayerRemoving:Connect(function(player)
+
     RemoveESP(player)
+
 end)
 
 --========================================================--
--- AIM LOOP
+-- CLOSE ESP WHEN CHARACTER CHANGES
+--========================================================--
+
+plr.CharacterRemoving:Connect(function()
+
+    -- Limpiar ESP mientras el personaje está muerto
+    for player,billboard in pairs(ESPObjects) do
+
+        if billboard then
+            billboard:Destroy()
+        end
+
+        ESPObjects[player] = nil
+
+    end
+
+end)
+
+--========================================================--
+-- GET CLOSEST PLAYER
 --========================================================--
 
 local function GetClosestPlayer()
@@ -807,20 +1162,44 @@ local function GetClosestPlayer()
                         ).Magnitude
 
                     if mag < distance then
+
                         distance = mag
                         closest = v
+
                     end
+
                 end
+
             end
+
         end
+
     end
 
     return closest
+
 end
+
+--========================================================--
+-- AIM LOOP
+--========================================================--
 
 RS.RenderStepped:Connect(function()
 
     if getgenv().Nakano.Aim then
+
+        local character = plr.Character
+
+        if not character then
+            return
+        end
+
+        local humanoid =
+            character:FindFirstChildOfClass("Humanoid")
+
+        if not humanoid or humanoid.Health <= 0 then
+            return
+        end
 
         local target = GetClosestPlayer()
 
@@ -833,8 +1212,11 @@ RS.RenderStepped:Connect(function()
                     cam.CFrame.Position,
                     target.Character.HumanoidRootPart.Position
                 )
+
         end
+
     end
+
 end)
 
 --========================================================--
@@ -847,21 +1229,42 @@ task.spawn(function()
 
         if getgenv().Nakano.AutoTP then
 
+            local character = plr.Character
+
+            if not character then
+                continue
+            end
+
+            local humanoid =
+                character:FindFirstChildOfClass("Humanoid")
+
+            local root =
+                character:FindFirstChild("HumanoidRootPart")
+
+            if not humanoid
+            or humanoid.Health <= 0
+            or not root then
+                continue
+            end
+
             local target = GetClosestPlayer()
 
             if target
             and target.Character
-            and plr.Character
-            and plr.Character:FindFirstChild("HumanoidRootPart") then
+            and target.Character:FindFirstChild("HumanoidRootPart") then
 
-                plr.Character.HumanoidRootPart.CFrame =
+                root.CFrame =
                     CFrame.new(
                         target.Character.HumanoidRootPart.Position
                         + Vector3.new(2,1,2)
                     )
+
             end
+
         end
+
     end
+
 end)
 
 --========================================================--
@@ -870,9 +1273,32 @@ end)
 
 task.spawn(function()
 
-    while task.wait(2) do
+    while task.wait(1) do
 
-        if getgenv().Nakano.AutoV4 then
+        if getgenv().Nakano.AutoV4
+        and V4Ready then
+
+            local character = plr.Character
+
+            if not character then
+                continue
+            end
+
+            local humanoid =
+                character:FindFirstChildOfClass("Humanoid")
+
+            if not humanoid then
+                continue
+            end
+
+            -- NO ACTIVAR V4 SI ESTÁ MUERTO
+            if humanoid.Health <= 0 then
+                V4Ready = true
+                continue
+            end
+
+            -- Evita quedarse spameando Y continuamente
+            V4Ready = false
 
             pcall(function()
 
@@ -891,9 +1317,35 @@ task.spawn(function()
                     false,
                     game
                 )
+
             end)
+
+            -- Permitir otro intento después
+            task.wait(2)
+
+            if plr.Character
+            and plr.Character:FindFirstChildOfClass("Humanoid")
+            and plr.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+
+                V4Ready = true
+
+            end
+
         end
+
     end
+
 end)
 
+--========================================================--
+-- FINAL AUTO SAVE
+--========================================================--
+
+if getgenv().Nakano.AutoSave then
+    task.delay(1,SaveConfig)
+end
+
 print("NAKANO HUB V13 • LOADED")
+print("MAX LEVEL:",MAX_LEVEL)
+print("ESP RANGE:",ESP_MAX_DISTANCE)
+print("AUTO SAVE:",getgenv().Nakano.AutoSave)z
