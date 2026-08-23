@@ -1,4 +1,4 @@
---// LAS QUINTILLIZAS • BLOX FRUITS
+--// NAKANO HUB
 --// By Kervie_Kuchau95
 --// Mobile-safe Miku drag: does not intentionally capture Roblox joystick input
 
@@ -16,9 +16,11 @@ getgenv().Nakano = getgenv().Nakano or {
     AutoTP = false,
     AutoV4 = false,
     Aim = false,
+    CamLock = false,
+    FollowEnemy = false,
     ESP = false,
-    Boost = false,
-    FOV = 300
+    FOV = 300,
+    Boost = false
 }
 
 if game.CoreGui:FindFirstChild("NakanoV13") then
@@ -53,6 +55,8 @@ local function SaveConfig()
             AutoTP = getgenv().Nakano.AutoTP,
             AutoV4 = getgenv().Nakano.AutoV4,
             Aim = getgenv().Nakano.Aim,
+            CamLock = getgenv().Nakano.CamLock,
+            FollowEnemy = getgenv().Nakano.FollowEnemy,
             ESP = getgenv().Nakano.ESP,
             Boost = getgenv().Nakano.Boost,
             AutoSave = getgenv().Nakano.AutoSave,
@@ -82,6 +86,24 @@ for key,value in pairs(savedConfig) do
 end
 
 getgenv().Nakano.AutoSave = savedConfig.AutoSave == true
+if savedConfig.CamLock == nil then
+    getgenv().Nakano.CamLock = false
+end
+if savedConfig.FollowEnemy == nil then
+    getgenv().Nakano.FollowEnemy = false
+end
+if getgenv().Nakano.FOV == nil then
+    getgenv().Nakano.FOV = 300
+end
+
+-- Explicit defaults for older configuration files.
+if getgenv().Nakano.AutoTP == nil then getgenv().Nakano.AutoTP = false end
+if getgenv().Nakano.AutoV4 == nil then getgenv().Nakano.AutoV4 = false end
+if getgenv().Nakano.Aim == nil then getgenv().Nakano.Aim = false end
+if getgenv().Nakano.Boost == nil then getgenv().Nakano.Boost = false end
+
+-- V13 migration: the old AutoTP feature is intentionally disabled.
+getgenv().Nakano.AutoTP = false
 
 --========================================================--
 -- NOTIFICATION
@@ -111,7 +133,7 @@ local notifTitle = Instance.new("TextLabel", notif)
 notifTitle.Size = UDim2.new(1,-85,0,24)
 notifTitle.Position = UDim2.new(0,82,0,15)
 notifTitle.BackgroundTransparency = 1
-notifTitle.Text = "NAKANO HUB ⚡"
+notifTitle.Text = "NAKANO HUB 鈿�"
 notifTitle.Font = PIXEL
 notifTitle.TextSize = 16
 notifTitle.TextColor3 = PINK_SOFT
@@ -121,7 +143,7 @@ local notifBy = Instance.new("TextLabel", notif)
 notifBy.Size = UDim2.new(1,-85,0,20)
 notifBy.Position = UDim2.new(0,82,0,42)
 notifBy.BackgroundTransparency = 1
-notifBy.Text = "by Kervie_Kuchau95"
+notifBy.Text = "by Kervie_Kuchau"
 notifBy.Font = PIXEL
 notifBy.TextSize = 11
 notifBy.TextColor3 = Color3.new(1,1,1)
@@ -150,7 +172,7 @@ local main = Instance.new("Frame",gui)
 main.Size = UDim2.new(0,395,0,470)
 main.Position = UDim2.new(0.5,-197,0.5,-235)
 main.BackgroundColor3 = Color3.fromRGB(22,18,28)
-main.BackgroundTransparency = 0.25
+main.BackgroundTransparency = 0.38
 main.Visible = false
 main.Active = true
 
@@ -164,10 +186,27 @@ mainStroke.Transparency = 0.08
 local mainGlow = Instance.new("UIStroke",main)
 mainGlow.Color = PINK_BRIGHT
 mainGlow.Thickness = 8
-mainGlow.Transparency = 0.78
+mainGlow.Transparency = 0.62
+
+local gloss = Instance.new("Frame", main)
+gloss.Name = "Gloss"
+gloss.Size = UDim2.new(1,-6,0,92)
+gloss.Position = UDim2.new(0,3,0,3)
+gloss.BackgroundColor3 = PINK_SOFT
+gloss.BackgroundTransparency = 0.88
+gloss.BorderSizePixel = 0
+gloss.ZIndex = 2
+Instance.new("UICorner", gloss).CornerRadius = UDim.new(0,14)
+
+local glossGradient = Instance.new("UIGradient", gloss)
+glossGradient.Rotation = 90
+glossGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0,0.15),
+    NumberSequenceKeypoint.new(1,1)
+})
 
 --========================================================--
--- MIKU BUTTON • MOBILE SAFE
+-- MIKU BUTTON 鈥� MOBILE SAFE
 --========================================================--
 
 local miku = Instance.new("ImageButton",gui)
@@ -276,7 +315,7 @@ sakuraContainer.ZIndex = 10
 
 for i = 1,8 do
     local petal = Instance.new("TextLabel",sakuraContainer)
-    petal.Text = "🌸"
+    petal.Text = "馃尭"
     petal.Size = UDim2.new(0,20,0,20)
     petal.Position = UDim2.new(math.random(),0,-0.1,0)
     petal.BackgroundTransparency = 1
@@ -303,7 +342,7 @@ end
 local top = Instance.new("Frame",main)
 top.Size = UDim2.new(1,0,0,42)
 top.BackgroundColor3 = PINK_BRIGHT
-top.BackgroundTransparency = 0.2
+top.BackgroundTransparency = 0.35
 Instance.new("UICorner",top).CornerRadius = UDim.new(0,16)
 local topStroke = Instance.new("UIStroke",top)
 topStroke.Color = PINK_SOFT
@@ -314,7 +353,7 @@ local title = Instance.new("TextLabel",top)
 title.Size = UDim2.new(1,-60,1,0)
 title.Position = UDim2.new(0,15,0,0)
 title.BackgroundTransparency = 1
-title.Text = "LAS QUINTILLIZAS • BLOX FRUITS"
+title.Text = "NAKANO HUB"
 title.Font = PIXEL
 title.TextSize = 14
 title.TextColor3 = Color3.new(1,1,1)
@@ -550,7 +589,7 @@ local function MakeESPOption(name,default,callback)
     label.Size = UDim2.new(0.7,0,1,0)
     label.Position = UDim2.new(0,30,0,0)
     label.BackgroundTransparency = 1
-    label.Text = "• "..name
+    label.Text = "鈥� "..name
     label.Font = PIXEL
     label.TextSize = 9
     label.TextColor3 = Color3.fromRGB(230,190,215)
@@ -697,6 +736,14 @@ MakeToggle(
                         obj.Enabled = false
                     elseif obj:IsA("Clouds") then
                         obj.Enabled = false
+                    elseif obj:IsA("Highlight") then
+                        obj.Enabled = false
+                    elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                        -- Keep textures/images intact; do not destroy them.
+                        -- Only reduce costly transparency effects.
+                        if obj.Transparency < 1 then
+                            obj.Transparency = math.min(1, obj.Transparency + 0.15)
+                        end
                     end
                 end)
             end
@@ -705,21 +752,33 @@ MakeToggle(
 )
 
 MakeToggle(
-    "AUTO TP PLAYER",
-    "Players only - NPC protection",
-    getgenv().Nakano.AutoTP == true,
+    "FOLLOW ENEMY",
+    "Follow the selected player without teleporting",
+    getgenv().Nakano.FollowEnemy == true,
     function(v)
-        getgenv().Nakano.AutoTP = v
+        getgenv().Nakano.FollowEnemy = v
+        -- Keep the legacy AutoTP state off: this feature never teleports.
+        getgenv().Nakano.AutoTP = false
         if getgenv().Nakano.AutoSave then SaveConfig() end
     end
 )
 
 MakeToggle(
     "AIMBOT PVP",
-    "Lock onto the closest player",
+    "Turn your character toward the closest player",
     getgenv().Nakano.Aim == true,
     function(v)
         getgenv().Nakano.Aim = v
+        if getgenv().Nakano.AutoSave then SaveConfig() end
+    end
+)
+
+MakeToggle(
+    "CAM LOCK",
+    "Lock the camera onto the closest player",
+    getgenv().Nakano.CamLock == true,
+    function(v)
+        getgenv().Nakano.CamLock = v
         if getgenv().Nakano.AutoSave then SaveConfig() end
     end
 )
@@ -758,7 +817,7 @@ local premium = Instance.new("Frame",main)
 premium.Size = UDim2.new(1,-20,0,34)
 premium.Position = UDim2.new(0,10,1,-42)
 premium.BackgroundColor3 = PINK_BRIGHT
-premium.BackgroundTransparency = 0.28
+premium.BackgroundTransparency = 0.40
 Instance.new("UICorner",premium).CornerRadius = UDim.new(0,10)
 local premiumStroke = Instance.new("UIStroke",premium)
 premiumStroke.Color = PINK_SOFT
@@ -768,7 +827,7 @@ premiumStroke.Transparency = 0.15
 local premiumText = Instance.new("TextLabel",premium)
 premiumText.Size = UDim2.new(1,0,1,0)
 premiumText.BackgroundTransparency = 1
-premiumText.Text = "Nino Nakano 💕🌸"
+premiumText.Text = "Nino Nakano 馃挄馃尭"
 premiumText.Font = PIXEL
 premiumText.TextSize = 11
 premiumText.TextColor3 = Color3.new(1,1,1)
@@ -841,81 +900,135 @@ local function GetClosestPlayer()
 end
 
 RS.RenderStepped:Connect(function()
-    if getgenv().Nakano.Aim then
-        local target = GetClosestPlayer()
+    local aimEnabled = getgenv().Nakano.Aim == true
+    local camLockEnabled = getgenv().Nakano.CamLock == true
 
-        if target
-        and target.Character
-        and target.Character:FindFirstChild("HumanoidRootPart") then
+    if not aimEnabled and not camLockEnabled then
+        return
+    end
 
-            cam.CFrame =
-                CFrame.new(
-                    cam.CFrame.Position,
-                    target.Character.HumanoidRootPart.Position
-                )
+    local target = GetClosestPlayer()
+    if not target or not target.Character then
+        return
+    end
+
+    local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+    if not targetRoot then return end
+
+    -- Smooth camera lock instead of snapping every frame.
+    if camLockEnabled then
+        local desired = CFrame.lookAt(cam.CFrame.Position, targetRoot.Position)
+        cam.CFrame = cam.CFrame:Lerp(desired, 0.35)
+    end
+
+    -- Aim stays independent from CamLock.
+    if aimEnabled then
+        local myCharacter = plr.Character
+        local myRoot = myCharacter and myCharacter:FindFirstChild("HumanoidRootPart")
+
+        if myRoot then
+            local myPos = myRoot.Position
+            local targetPos = targetRoot.Position
+            local flatTarget = Vector3.new(targetPos.X, myPos.Y, targetPos.Z)
+
+            if (flatTarget - myPos).Magnitude > 0.05 then
+                local desiredRoot = CFrame.lookAt(myPos, flatTarget)
+                myRoot.CFrame = myRoot.CFrame:Lerp(desiredRoot, 0.25)
+            end
         end
     end
 end)
 
 --========================================================--
--- AUTO TP • TRUE NEAREST PLAYER
--- Uses real 3D world distance, independent of camera/FOV.
+-- FOLLOW ENEMY 鈥� NO TELEPORT
+-- Keeps a visible camera-to-target guide and follows the
+-- selected enemy using normal movement instead of CFrame TP.
 --========================================================--
 
-local function GetNearestPlayerForTP()
-    local myCharacter = plr.Character
-    if not myCharacter then
-        return nil
-    end
+local followLine = nil
 
-    local myRoot = myCharacter:FindFirstChild("HumanoidRootPart")
-    if not myRoot then
-        return nil
-    end
-
-    local nearest = nil
-    local nearestDistance = math.huge
-
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= plr
-        and player.Character
-        and player.Character:FindFirstChild("HumanoidRootPart")
-        and player.Character:FindFirstChildOfClass("Humanoid") then
-
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            local root = player.Character:FindFirstChild("HumanoidRootPart")
-
-            if humanoid.Health > 0 then
-                local distance = (root.Position - myRoot.Position).Magnitude
-
-                if distance < nearestDistance then
-                    nearestDistance = distance
-                    nearest = player
-                end
-            end
+local function UpdateFollowLine(target)
+    if not getgenv().Nakano.FollowEnemy or not target
+    or not target.Character then
+        if followLine then
+            followLine:Destroy()
+            followLine = nil
         end
+        return
     end
 
-    return nearest
+    local root = target.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    if not followLine then
+        followLine = Instance.new("Beam")
+        followLine.Name = "NakanoFollowLine"
+        followLine.FaceCamera = true
+        followLine.Width0 = 0.035
+        followLine.Width1 = 0.035
+        followLine.LightEmission = 1
+        followLine.Color = ColorSequence.new(PINK_BRIGHT)
+
+        local a0 = Instance.new("Attachment")
+        a0.Name = "NakanoCameraGuide"
+        a0.Parent = workspace.Terrain
+
+        local a1 = Instance.new("Attachment")
+        a1.Name = "NakanoTargetGuide"
+        a1.Parent = root
+
+        followLine.Attachment0 = a0
+        followLine.Attachment1 = a1
+        followLine.Parent = workspace.Terrain
+    end
+
+    local cameraAttachment = followLine.Attachment0
+    if cameraAttachment then
+        cameraAttachment.WorldPosition = cam.CFrame.Position
+    end
+
+    if followLine.Attachment1.Parent ~= root then
+        followLine.Attachment1.Parent = root
+    end
 end
 
-task.spawn(function()
-    while task.wait(0.35) do
-        if getgenv().Nakano.AutoTP then
-            local target = GetNearestPlayerForTP()
+local function StopFollowLine()
+    if followLine then
+        followLine:Destroy()
+        followLine = nil
+    end
+end
 
-            if target
-            and target.Character
-            and target.Character:FindFirstChild("HumanoidRootPart")
-            and plr.Character
-            and plr.Character:FindFirstChild("HumanoidRootPart") then
+RS.RenderStepped:Connect(function()
+    if not getgenv().Nakano.FollowEnemy then
+        StopFollowLine()
+        return
+    end
 
-                plr.Character.HumanoidRootPart.CFrame =
-                    CFrame.new(
-                        target.Character.HumanoidRootPart.Position
-                        + Vector3.new(2,1,2)
-                    )
-            end
+    local target = GetClosestPlayer()
+
+    if not target
+    or not target.Character
+    or not target.Character:FindFirstChild("HumanoidRootPart") then
+        StopFollowLine()
+        return
+    end
+
+    UpdateFollowLine(target)
+
+    local myCharacter = plr.Character
+    local myRoot = myCharacter and myCharacter:FindFirstChild("HumanoidRootPart")
+    local humanoid = myCharacter and myCharacter:FindFirstChildOfClass("Humanoid")
+
+    if myRoot and humanoid and humanoid.Health > 0 then
+        local targetRoot = target.Character.HumanoidRootPart
+        local offset = targetRoot.Position - targetRoot.CFrame.LookVector * 5
+        local delta = offset - myRoot.Position
+
+        if delta.Magnitude > 7 then
+            humanoid:MoveTo(offset)
+        else
+            humanoid:Move(Vector3.zero, false)
         end
     end
 end)
@@ -925,14 +1038,36 @@ end)
 --========================================================--
 
 task.spawn(function()
-    while task.wait(2) do
-        if getgenv().Nakano.AutoV4 then
-            pcall(function()
-                VIM:SendKeyEvent(true,"Y",false,game)
-                task.wait(0.1)
-                VIM:SendKeyEvent(false,"Y",false,game)
-            end)
+    while task.wait(0.35) do
+        if not getgenv().Nakano.AutoV4 then
+            continue
         end
+
+        local character = plr.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+        if not humanoid or humanoid.Health <= 0 then
+            continue
+        end
+
+        -- Do not spam Y while Roblox is still transitioning the character
+        -- between movement/death/respawn states.
+        local state = humanoid:GetState()
+
+        if state == Enum.HumanoidStateType.Dead
+        or state == Enum.HumanoidStateType.Physics
+        or state == Enum.HumanoidStateType.PlatformStanding then
+            continue
+        end
+
+        pcall(function()
+            VIM:SendKeyEvent(true, "Y", false, game)
+            task.wait(0.06)
+            VIM:SendKeyEvent(false, "Y", false, game)
+        end)
+
+        -- Give Roblox movement/input a short window before the next attempt.
+        task.wait(0.45)
     end
 end)
 
@@ -944,4 +1079,4 @@ task.spawn(function()
     end
 end)
 
-print("NAKANO HUB V13 • LOADED")
+print("NAKANO HUB V13 鈥� LOADED")
